@@ -1,36 +1,53 @@
 /*
-  useEffect
-  리액트 컴포넌트마다의 생명주기를 관리하기 위한 hook
-  생명주기 : 컴포넌트의 생성(Mount), 변경(ReRender), 소멸(UnMount)를 의미
-  - useEffect는 컴포넌트의 생성, 변경, 소멸의 시점에 맞춰 등록된 콜백함수 호출 가능
-  - 각 컴포넌트의 중요한 생명주기 시점마다 원하는 기능을 연결가능
-
-  실무에서 자주 활용되는 생명주기 사례
-  - Mount : Data fetching, window 객체에 이벤트 핸드러 연결
-  - ReRender : 특정 State값 변경될때만 실행해야 되는 핸들러 연결
-  - UnMount : window객체에 이벤트 핸들러 제거
-
-  useEffect(callback(콜백함수), dependency Array(의존성배열))
+  기존에는 src에서 이용하지만 public에 있는 자료는 컴포넌트를 한번 빌드이후에 가져오기때문에 fetching해서,, 자바스크립트 내장함수로 한번만 실행하는지? useEffect 사용 전 후를 보여주겠다....
 */
 
 import { useEffect, useState } from "react";
 
 export default function App() {
-	// useState(초기값);
-	console.log("App Render");
+	//member.json파일로 부터 데이터를 펫치한 다음에 해당 펫치함수의 프로미스를 반환해서 then이라는 메서드를 사용할 수 있음
+	// json 객체형태로 파싱을 해야하니깐 data를 받아서 data.json으로 받아서 프로미스를 반환해서 than 메서드를 받아서 json을 받아서 내부 콜백함수로 확인할 수 있음
 
-	let [Num, setNum] = useState(0);
+	// 펫치 순서? 데이터 확인
+	// const fetchData = () => {
+	// 	console.log("fetchData");
+
+	// 	fetch("/member.json")
+	// 		.then(data => data.json())
+	// 		.then(json => {
+	// 			console.log(json);
+	// 		});
+	// };
+	// fetchData();
+
+	// App컴포넌트가 실행시점에는 데이터를 가져올 수 없기 때문에 값을 [] 초기화시켜준다.
+	console.log("App Render");
+	const [Members, setMembers] = useState([]);
+
+	// 아래와 같이 useEffect를 처리하지 않은 상태에서 서버에서 fetching한 데이터를 state에 담으면 무한로딩 발생
+	// setMembers에서 배열데이터를 바뀌어서 데이터가 변경되므로 App을 또 호출하고 useState를 호출하고 해서 무한로딩,,,
+	// fetch("/member.json")
+	// 	.then(data => data.json())
+	// 	.then(json => {
+	// 		console.log(json.members); // member.json 데이터 받음
+	// 		setMembers(json.members); // 전개연산자를 안 써도 된다는말을 하시네,,
+	// 	});
 
 	useEffect(() => {
-		// useEffect(() => {}, []); 의존성 배열 [] 이게 비어있을때는 해당 컴포넌트가 마운트시 한번만 호출됨
-		// 다른 요인이 있어도 useEffect안쪽은 처음한번만 data fetching할때 매번 useEffect를 호출하므로 연산이 들어가며 무한로딩에 빠져서 이걸 꼭 써야한다는
-		console.log("의존성 배열이 비어있을때의 콜백함수");
+		fetch("/member.json")
+			.then(data => data.json())
+			.then(json => {
+				console.log(json.members);
+				setMembers(json.members);
+			});
 	}, []);
+
 	return (
 		<>
 			<h1>useEffect</h1>
-			<h2>{Num}</h2>
-			<button onClick={() => setNum(Num + 1)}>+</button>
+			{Members.map((data, idx) => (
+				<h2 key={idx}>{data.name}</h2>
+			))}
 		</>
 	);
 }
