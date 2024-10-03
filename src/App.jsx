@@ -1,56 +1,24 @@
-/*
-  기존에는 src에서 이용하지만 public에 있는 자료는 컴포넌트를 한번 빌드이후에 가져오기때문에 fetching해서,, 자바스크립트 내장함수로 한번만 실행하는지? useEffect 사용 전 후를 보여주겠다....
-*/
-
 import { useEffect, useState } from "react";
+import Modal from "./Modal";
 
 export default function App() {
-	//member.json파일로 부터 데이터를 펫치한 다음에 해당 펫치함수의 프로미스를 반환해서 then이라는 메서드를 사용할 수 있음
-	// json 객체형태로 파싱을 해야하니깐 data를 받아서 data.json으로 받아서 프로미스를 반환해서 than 메서드를 받아서 json을 받아서 내부 콜백함수로 확인할 수 있음
-
-	// 펫치 순서? 데이터 확인
-	// const fetchData = () => {
-	// 	console.log("fetchData");
-
-	// 	fetch("/member.json")
-	// 		.then(data => data.json())
-	// 		.then(json => {
-	// 			console.log(json);
-	// 		});
-	// };
-	// fetchData();
-
-	// App컴포넌트가 실행시점에는 데이터를 가져올 수 없기 때문에 값을 [] 초기화시켜준다.
 	console.log("App Render");
-	const [Members, setMembers] = useState([]);
+	// useState 초기값을 false로 실무에서 자주 쓰임
+	let [IsOpen, setIsOpen] = useState(false);
 
-	// 아래와 같이 useEffect를 처리하지 않은 상태에서 서버에서 fetching한 데이터를 state에 담으면 무한로딩 발생
-	// setMembers에서 배열데이터를 바뀌어서 데이터가 변경되므로 App을 또 호출하고 useState를 호출하고 해서 무한로딩,,,
-	// fetch("/member.json")
-	// 	.then(data => data.json())
-	// 	.then(json => {
-	// 		console.log(json.members); // member.json 데이터 받음
-	// 		setMembers(json.members); // 전개연산자를 안 써도 된다는말을 하시네,,
-	// 	});
+	console.log(IsOpen);
 
+	//의존성 배열에 IsOpen state를 등록해서
+	//모달창 출력 유무의 정보값이 변경될때에만 전용함수인 body요소의 스크롤바 제거, 생성의 기능을 선별적으로 호출
 	useEffect(() => {
-		//의존성 배열이 비어있는 useEffect문의 콜백함수는 아무리 해당 컴포넌트가 재랜더링되더라도
-		//처음 마운트시 한번만 호출되므로 fetch함수가 처음 한번만 데이터를 가져오고 더이상 무한호출에 빠지지 않음
-		//실무에서 React-Query를 쓰기 전까지는 제일 많이 쓰이는 리액트 개발 패턴 (중요)
-		fetch("/member.json")
-			.then(data => data.json())
-			.then(json => {
-				console.log(json.members);
-				setMembers(json.members);
-			});
-	}, []);
+		IsOpen ? (document.body.style.overflow = "hidden") : (document.body.style.overflow = "auto");
+	}, [IsOpen]);
 
 	return (
-		<>
+		<main className="h-[300vh] w-full">
 			<h1>useEffect</h1>
-			{Members.map((data, idx) => (
-				<h2 key={idx}>{data.name}</h2>
-			))}
-		</>
+			<button onClick={() => setIsOpen(!IsOpen)}>모달창 토글</button>
+			{IsOpen && <Modal />}
+		</main>
 	);
 }
